@@ -1,0 +1,53 @@
+<% provide(:title, '全プロジェクト報告集計') %>
+
+<%= content_for :side_menu do %>
+  <%= render partial: 'layouts/sidebar' , locals: { user: @user, project: nil } %>
+<% end %>
+
+<div class="mt-3 mr-5 ml-4">
+  <h1 class="text-center">全プロジェクト報告集計</h1>
+  <div class="text-center justify-content-end mb-3">
+    <div class="last_rate_day_title">最終報告集計日</div>
+    <%= form_with url: all_project_reporting_rate_user_projects_path(@user), method: :get, local: true do |form| %>
+      <%= form.date_field :search, class: "search-box" %>
+      <%= form.submit "検索", class: "btn btn-outline-orange" %>
+    <% end %>
+  </div>
+  <div class="table-background">
+    <table class="table-layout">
+      <thead class="report-rate-table-header">
+        <tr>
+          <th rowspan="2" class="item">プロジェクト名</th>
+          <th colspan="4" class="item">報告集計日</th>
+          <th rowspan="2" class="item">総合報告率</th>
+        </tr>
+        <tr class="table-body-layout">
+          <% @report_days_for_each_four_weeks.reverse.each do |one_week| %>
+            <th rowspan="1" class="body"><%= "#{I18n.l(one_week.first, format: :short_day)}～#{I18n.l(one_week.last, format: :short_day)}" %></th>
+          <% end %>
+        </tr>
+      </thead>
+      <% if @projects.present? %>
+      <tbody class="table-body-layout">
+        <% @projects.each do |project| %>
+          <tr>
+            <% if project[:link_on] %>
+              <td class="body"><%= link_to(project[:project_name], user_project_reports_view_reports_log_path(@user, project[:id])) %></td>
+            <% else %>
+              <td class="body"><%= project[:project_name] %></td>
+            <% end %>
+            <td class="body"><%= project[:rate_week1] %></td>
+            <td class="body"><%= project[:rate_week2] %></td>
+            <td class="body"><%= project[:rate_week3] %></td>
+            <td class="body"><%= project[:rate_week4] %></td>
+            <td class="body"><%= project[:overall_reporting_rate] %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    <% else %>
+      <td colspan="6">まだプロジェクトは作成されていません</td>
+    <% end%>
+    </table>
+  </div>
+</div>
+

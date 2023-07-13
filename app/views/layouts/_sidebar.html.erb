@@ -27,6 +27,7 @@
       <%= sidebar_link_item('プロジェクト詳細', user_project_path(user, project)) %>
     <% end %>
     <%= sidebar_link_item('プロジェクト一覧', user_projects_path(user.id)) %>
+    <%= sidebar_link_item('全プロジェクト報告集計', all_project_reporting_rate_user_projects_path(current_user)) %>
   </div>
 </div>
 
@@ -55,5 +56,6 @@
     <%= sidebar_link_item('プロジェクト詳細', user_project_path(user, project)) %>
   <% end %>
   <%= sidebar_link_item('プロジェクト一覧', user_projects_path(user.id)) %>
+  <%= sidebar_link_item('全プロジェクト報告集計', all_project_reporting_rate_user_projects_path(current_user)) %>
 </div>
 

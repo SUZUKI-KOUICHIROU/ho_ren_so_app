@@ -22,6 +22,9 @@ Rails.application.routes.draw do
   resources :users, only: %i[edit] do
     scope module: :projects do
       resources :projects do
+        collection do
+          get 'reports/all_project_reporting_rate', as: :all_project_reporting_rate
+        end
         get 'new_period'
         get 'notice_not_submitted_members'
         get 'reports/view_reports'

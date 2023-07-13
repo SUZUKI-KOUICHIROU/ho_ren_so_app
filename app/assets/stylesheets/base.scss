@@ -17,14 +17,14 @@ $base-form-color:#fff5ee;
   -webkit-flex-grow: 1;
   flex-grow: 1;
   @media (min-width: 800px) {
-  margin-left: 220px;
+  margin-left: 260px;
   }
 }
 
 // .pageによる左marginを非適用にする
 .not_padding {
   @media (min-width: 800px) {
-    margin-left: -220px;
+    margin-left: -260px;
     }
 }
 

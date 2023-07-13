@@ -1,3 +1,11 @@
+@mixin title-item {
+    border-radius: 5px;
+    background-color: $base-color;
+    color: $base-sub-color;
+    font-size: 1.2rem;
+    margin: 0.5rem auto;
+}
+
 .box-project-report {
   margin: 2.5rem auto 5rem;
   box-sizing: border-box;
@@ -115,3 +123,39 @@
     text-decoration: underline;
   }
 }
+
+//全プロジェクト報告集計画面
+.last_rate_day_title {
+  @include title-item;
+  width: 50%;
+}
+
+.table-background {
+  background-color: $base-background-color;
+  padding: 1rem; border-radius: 10px;
+}
+
+.table-layout {
+  width: 100%;
+  border-collapse:separate;
+  border-spacing: 5px;
+}
+
+.report-rate-table-header {
+  font-weight: 700;
+  text-align: center;
+  vertical-align: middle;
+  .item {
+    @include title-item;
+  }
+}
+
+.table-body-layout {
+  background-color: white;
+  .body {
+      border-radius: 10px;
+      text-align: center;
+      vertical-align: middle;
+    }
+}
+

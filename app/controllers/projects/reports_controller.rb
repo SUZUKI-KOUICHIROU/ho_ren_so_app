@@ -32,7 +32,7 @@ class Projects::ReportsController < Projects::BaseProjectController
     @project = Project.find(params[:project_id])
     @projects = @user.projects
     @report = @user.reports.build(project_id: @project.id)
-    @answer = @report.answers.build
+    @answer = @report.answers.new
     @questions = @project.questions.where(using_flag: true)
   end
 
@@ -141,6 +141,29 @@ class Projects::ReportsController < Projects::BaseProjectController
     redirect_to user_project_reports_path(@user, @project)
   end
 
+  # 全プロジェクト報告集計画面表示
+  def all_project_reporting_rate
+    @user = current_user
+    @report_days_for_each_four_weeks = four_weeks_from_yesterday_array
+    # プロジェクトの情報とそのプロジェクトの報告率の値を持つ配列を代入
+    @projects = Project.all.map do |project|
+      @four_weeks_report_rate_array = []
+      @n = 5
+      # プロジェクトの一週間の報告率を４週間分のハッシュの配列として代入
+      report_rate_for_each_four_weeks = @report_days_for_each_four_weeks.map do |one_week|
+        @n -= 1
+        one_week_reports_rate = one_week_report_rate_calc(one_week, project)
+        @four_weeks_report_rate_array = @four_weeks_report_rate_array.push(one_week_reports_rate)
+        ["rate_week#{@n}".to_sym, "#{one_week_reports_rate}%"]
+      end
+      overall_reporting_rate_array = [[:overall_reporting_rate, "#{overall_report_rate_calc(@four_weeks_report_rate_array)}%"]]
+      link_status = project_mender_or_admin?(@user, project)
+      project_date_array = [[:project_name, project.name], [:id, project.id], [:created_at, project.created_at], [:link_on, link_status]]
+      project_array = report_rate_for_each_four_weeks + project_date_array + overall_reporting_rate_array
+      project_array.to_h
+    end
+  end
+
   # 再提出を求める。
   def reject
     @report = Report.find(params[:id])
@@ -237,5 +260,49 @@ class Projects::ReportsController < Projects::BaseProjectController
       answers_attributes: [
         :id, :question_type, :question_id, :value, array_value: []
       ])
+  end
+
+  # 報告日のみの検索に使用するパラメーター
+  def search_params
+    params.permit(:search)
+  end
+
+  # 昨日もしくは、送られた最終報告集計日から４週間を一週間ごとに配列に代入
+  def four_weeks_from_yesterday_array
+    four_weeks_last_rate_day = if search_params[:search].present?
+                                 search_params[:search].to_date
+                               else
+                                 Date.yesterday
+                               end
+    one_week_last_rate_day = four_weeks_last_rate_day
+    one_week_first_rate_day = four_weeks_last_rate_day - 6
+    return (1..4).map do |n|
+      if n == 1
+        one_week_first_rate_day..one_week_last_rate_day
+      elsif n > 1
+        n_week_ago = (n - 1)
+        n_week_ago.weeks.before(one_week_first_rate_day)..n_week_ago.weeks.before(one_week_last_rate_day)
+      end
+    end
+  end
+
+  # プロジェクトメンバー全員の一週間の報告率を計算して返す
+  def one_week_report_rate_calc(one_week, project)
+    project_four_weeks_reports_size = Report.befor_deadline_reports_size(project.reports.where(report_day: one_week))
+    return (project_four_weeks_reports_size.quo(7 * project.project_users.size).to_f * 100).floor
+  end
+
+  # プロジェクトメンバーかスタッフかを判断する
+  def project_mender_or_admin?(user, project)
+    if user.project_users.find_by(project_id: project.id).present? || user.admin
+      return true
+    else
+      return false
+    end
+  end
+
+  # 総合報告率の計算
+  def overall_report_rate_calc(reports_rate_array)
+    return reports_rate_array.sum.quo(reports_rate_array.size).to_f.floor
   end
 end
